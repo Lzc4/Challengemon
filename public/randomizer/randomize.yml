@@ -1,0 +1,33 @@
+name: Randomize
+run-name: Randomize ${{ inputs.id }}
+
+on:
+  workflow_dispatch:
+    inputs:
+      id:
+        description: Auftrag
+        required: true
+      job:
+        description: Auftragsdaten
+        required: true
+
+jobs:
+  randomize:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: "17"
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+      - name: Randomizer laden
+        run: |
+          curl -sSL -o upr.zip https://github.com/Ajarmar/universal-pokemon-randomizer-zx/releases/download/v4.6.1/PokeRandoZX-v4_6_1.zip
+          unzip -q upr.zip -d upr
+          javac --release 17 -cp upr/PokeRandoZX.jar -d build randomizer/SeededRandomizer.java
+      - name: Randomisieren
+        run: node randomizer/run.mjs

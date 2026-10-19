@@ -1,0 +1,38 @@
+export const DEFAULT_CONTROLS = {
+  0: {
+    0: { value: "x", value2: "BUTTON_1" },
+    1: { value: "s", value2: "BUTTON_3" },
+    2: { value: "v", value2: "SELECT" },
+    3: { value: "enter", value2: "START" },
+    4: { value: "up arrow", value2: "DPAD_UP" },
+    5: { value: "down arrow", value2: "DPAD_DOWN" },
+    6: { value: "left arrow", value2: "DPAD_LEFT" },
+    7: { value: "right arrow", value2: "DPAD_RIGHT" },
+    8: { value: "z", value2: "BUTTON_2" },
+    9: { value: "a", value2: "BUTTON_4" },
+    10: { value: "q", value2: "LEFT_TOP_SHOULDER" },
+    11: { value: "e", value2: "RIGHT_TOP_SHOULDER" },
+    14: { value: "m", value2: "LEFT_STICK" },
+    24: {},
+    25: {},
+    26: {},
+    27: {},
+    28: {},
+    29: {},
+  },
+  1: {},
+  2: {},
+  3: {},
+};
+
+export const HIDDEN_BUTTONS = {
+  saveState: false,
+  loadState: false,
+  quickSave: false,
+  quickLoad: false,
+  saveSavFiles: false,
+  loadSavFiles: false,
+  netplay: false,
+  cacheManager: false,
+  exitEmulation: false,
+};

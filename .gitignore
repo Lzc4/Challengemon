@@ -1,0 +1,12 @@
+node_modules
+.next
+out
+.env
+.env.local
+*.tsbuildinfo
+next-env.d.ts
+*.nds
+*.gba
+*.sav
+*.rnqs
+.vercel
