@@ -6,13 +6,15 @@ import { supabase } from "@/lib/supabase/client";
 import { configureStorage } from "@/lib/userStorage";
 import { googleClientId, googleToken } from "@/lib/userStorage/gdrive";
 import { dropboxAppKey, startDropboxLogin } from "@/lib/userStorage/dropbox";
+import Dialog from "./Dialog";
 import PixelSprite from "./PixelSprite";
-import { CHIPPY, KISTLING, PROFESSOR, WOLKINO, type Sprite } from "./sprites";
+import { CHIPPY, KISTLING, PROFESSOR, RIVAL, RIVAL_NAME, WOLKINO, type Sprite } from "./sprites";
 
 const DONE_KEY = "cm.tutorial.done";
+export const MET_KEY = "cm.tutorial.met";
 export const REPLAY_EVENT = "cm-tutorial-replay";
 
-type Line = { text: string; spot?: string };
+type Line = { text: string; spot?: string; rival?: boolean };
 
 type StarterId = "local" | "gdrive" | "dropbox";
 
@@ -56,11 +58,17 @@ const STARTERS: Starter[] = [
   },
 ];
 
-function intro(name: string): Line[] {
+function intro(name: string, met: boolean): Line[] {
+  // wer sich gerade beim login schon vorgestellt hat, kriegt die begruessung nicht doppelt
+  const hello: Line[] = met
+    ? [{ text: `Da bist du ja, ${name}! Dann zeig ich dir mal, wie hier alles funktioniert.` }]
+    : [
+        { text: "Hallo! Willkommen in der Welt von CHALLENGEMON!" },
+        { text: "Mein Name ist KIESEL. Alle nennen mich nur die Challenge-Professorin." },
+        { text: `Und du bist also ${name}! Schön, dass du da bist.` },
+      ];
   return [
-    { text: "Hallo! Willkommen in der Welt von CHALLENGEMON!" },
-    { text: "Mein Name ist KIESEL. Alle nennen mich nur die Challenge-Professorin." },
-    { text: `Und du bist also ${name}! Schön, dass du da bist.` },
+    ...hello,
     { text: "Hier spielst du Nuzlocke- und Soullocke-Runs. Allein oder mit Freunden, direkt im Browser." },
     { text: "Die Regeln kennst du sicher: Pro Route darfst du nur die erste Begegnung fangen. Und wer besiegt wird, ist für immer weg." },
     { text: "Beim Soullocke seid ihr gekoppelt. Fällt dein Pokémon, fällt auch das deines Partners von derselben Route. Hart, aber fair!" },
@@ -72,46 +80,11 @@ function intro(name: string): Line[] {
     { text: "Beim Spielen siehst du dein Team live, eine Karte, die Level-Caps und den Chat mit deinen Mitspielern." },
     { spot: "spiele", text: "Unter SPIELE siehst du, welche Editionen du schon gemeistert hast." },
     { spot: "statistik", text: "Und die STATISTIK verrät, wer im Team die meisten Pokémon auf dem Gewissen hat…" },
+    { spot: "statistik", rival: true, text: "Spoiler: Ich bin's nicht. Ich spiele nämlich fehlerfrei!" },
+    { text: `Das sagt ${RIVAL_NAME} jedes Mal. Und dann kommt ein kritischer Treffer…` },
     { text: "So! Bevor es losgeht, brauchst du aber noch einen Partner." },
     { text: "Jedes dieser drei passt auf deine Spiele und Spielstände auf. Na los, such dir einen aus!" },
   ];
-}
-
-function useTypewriter(text: string) {
-  const [shown, setShown] = useState(0);
-  useEffect(() => {
-    setShown(0);
-    const t = setInterval(() => setShown((n) => (n >= text.length ? n : n + 1)), 22);
-    return () => clearInterval(t);
-  }, [text]);
-  return { visible: text.slice(0, shown), done: shown >= text.length, finish: () => setShown(text.length) };
-}
-
-function Dialog({ text, onNext, children }: { text: string; onNext?: () => void; children?: React.ReactNode }) {
-  const tw = useTypewriter(text);
-  const advance = useCallback(() => {
-    if (!tw.done) tw.finish();
-    else onNext?.();
-  }, [tw, onNext]);
-
-  useEffect(() => {
-    const onKey = (e: KeyboardEvent) => {
-      if (e.key === "Enter" || e.key === " " || e.key.toLowerCase() === "z") {
-        e.preventDefault();
-        advance();
-      }
-    };
-    window.addEventListener("keydown", onKey);
-    return () => window.removeEventListener("keydown", onKey);
-  }, [advance]);
-
-  return (
-    <div className="tut-dialog" onClick={advance} role="dialog" aria-live="polite">
-      <p>{tw.visible}</p>
-      {tw.done && children}
-      {tw.done && onNext && <span className="tut-next">▼</span>}
-    </div>
-  );
 }
 
 function Spotlight({ target }: { target?: string }) {
@@ -143,6 +116,7 @@ export default function Tutorial() {
   const [phase, setPhase] = useState<"talk" | "pick" | "confirm" | "after" | "end">("talk");
   const [pick, setPick] = useState(0);
   const [error, setError] = useState<string | null>(null);
+  const [met, setMet] = useState(false);
   const userId = useRef<string | null>(null);
 
   useEffect(() => {
@@ -160,9 +134,13 @@ export default function Tutorial() {
         const { data: profile } = await supabase().from("profiles").select("name").eq("id", user.id).maybeSingle();
         if (!alive) return;
         if (profile?.name) setName(profile.name);
+        try {
+          setMet(sessionStorage.getItem(MET_KEY) === "1");
+        } catch {}
         if (!user.user_metadata?.tutorial_done && !local) setOpen(true);
       });
     const replay = () => {
+      setMet(false);
       setStep(0);
       setPhase("talk");
       setPick(0);
@@ -179,6 +157,7 @@ export default function Tutorial() {
   const finish = useCallback(async (go?: string) => {
     try {
       if (userId.current) localStorage.setItem(DONE_KEY, userId.current);
+      sessionStorage.removeItem(MET_KEY);
     } catch {}
     await supabase()
       .auth.updateUser({ data: { tutorial_done: true } })
@@ -203,7 +182,7 @@ export default function Tutorial() {
 
   if (!open) return null;
 
-  const lines = intro(name);
+  const lines = intro(name, met);
   const line = lines[step];
   const starter = STARTERS[pick];
 
@@ -262,10 +241,14 @@ export default function Tutorial() {
       )}
 
       <div className="tut-stage">
-        <PixelSprite sprite={PROFESSOR} scale={7} className="tut-prof" />
+        <div className="tut-cast">
+          <PixelSprite sprite={PROFESSOR} scale={7} className="tut-prof" />
+          {phase === "talk" && line?.rival && <PixelSprite sprite={RIVAL} scale={7} className="tut-rival" />}
+        </div>
         {phase === "talk" && line && (
           <Dialog
             key={step}
+            who={line.rival ? RIVAL_NAME : undefined}
             text={line.text}
             onNext={() => {
               if (step + 1 < lines.length) setStep(step + 1);

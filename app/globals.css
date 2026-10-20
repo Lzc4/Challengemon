@@ -2435,6 +2435,134 @@ pre.code {
   color: #cbd5cf;
 }
 
+.tut-cast {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  width: 100%;
+  padding: 0 18px;
+}
+
+.tut-cast .tut-prof {
+  margin: 0 0 -6px;
+}
+
+.tut-rival {
+  margin-bottom: -6px;
+  filter: drop-shadow(0 8px 0 rgba(0, 0, 0, 0.35));
+  animation: tut-rival-in 0.5s steps(5), tut-idle 1.2s steps(2) 0.5s infinite;
+}
+
+.tut-who {
+  position: absolute;
+  top: -16px;
+  right: 18px;
+  padding: 3px 12px;
+  font-size: 0.85rem;
+  letter-spacing: 1px;
+  color: #f6f3e8;
+  background: #2b3440;
+  border-radius: 6px;
+  box-shadow: 0 0 0 2px #9bdc5c, 0 0 0 4px #1b1b22;
+}
+
+.tut-form {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin-top: 14px;
+  cursor: default;
+}
+
+.tut-form input {
+  font-family: var(--font-pixel), monospace;
+  font-size: 1.05rem;
+  color: #22252b;
+  background: #fffdf6;
+  border: 2px solid #6aa0b8;
+  border-radius: 6px;
+  user-select: text;
+}
+
+.tut-form input:focus {
+  outline: none;
+  border-color: #2f8f86;
+  box-shadow: 0 0 0 3px rgba(47, 143, 134, 0.25);
+}
+
+.tut-form input::placeholder {
+  color: #8a8f96;
+}
+
+.tut-form-row {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+
+.tut-form-row .link {
+  color: #4b6f80;
+}
+
+.tut-go {
+  margin-left: auto;
+  font-family: var(--font-pixel), monospace;
+  color: #f6f3e8;
+  background: #2b3440;
+  border: 0;
+  box-shadow: 0 0 0 2px #1b1b22;
+}
+
+.tut-go:hover:not(:disabled) {
+  background: #3f4c5c;
+}
+
+.tut-links {
+  margin: 10px 0 0;
+  font-family: var(--font-sans), sans-serif;
+}
+
+.tut-links a {
+  color: #2f6f86;
+}
+
+.welcome {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: space-between;
+  gap: 32px;
+  min-height: calc(100vh - 170px);
+  padding-top: 4vh;
+}
+
+.welcome-title {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+  max-width: 460px;
+  text-align: center;
+}
+
+.welcome-logo {
+  font-family: var(--font-pixel), monospace;
+  font-size: clamp(2rem, 7vw, 3.4rem);
+  letter-spacing: 3px;
+  color: var(--accent);
+  text-shadow: 0 4px 0 #3c5a24, 0 0 30px rgba(155, 220, 92, 0.25);
+}
+
+.tut-stage.welcome-stage {
+  position: static;
+  transform: none;
+  font-family: var(--font-pixel), monospace;
+}
+
+.welcome-toggle {
+  align-self: flex-end;
+}
+
 @keyframes tut-fade {
   from {
     opacity: 0;
@@ -2447,6 +2575,17 @@ pre.code {
 @keyframes tut-enter {
   from {
     transform: translateX(120px);
+    opacity: 0;
+  }
+  to {
+    transform: none;
+    opacity: 1;
+  }
+}
+
+@keyframes tut-rival-in {
+  from {
+    transform: translateX(160px);
     opacity: 0;
   }
   to {
@@ -2499,9 +2638,14 @@ pre.code {
     top: 70px;
   }
 
-  .tut-prof {
+  .tut-prof,
+  .tut-rival {
     width: 112px;
     height: auto;
+  }
+
+  .tut-form-row {
+    flex-wrap: wrap;
   }
 
   .tut-dialog p {
@@ -2511,6 +2655,7 @@ pre.code {
 
 @media (prefers-reduced-motion: reduce) {
   .tut-prof,
+  .tut-rival,
   .tut-bounce,
   .tut-next {
     animation: none;

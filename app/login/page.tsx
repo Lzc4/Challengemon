@@ -1,9 +1,12 @@
 "use client";
 
 import Link from "next/link";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { supabase } from "@/lib/supabase/client";
 import LegalFooter from "@/components/LegalFooter";
+import Welcome from "@/components/tutorial/Welcome";
+
+const CLASSIC_KEY = "cm.login.classic";
 
 type Mode = "login" | "signup" | "reset";
 
@@ -16,6 +19,22 @@ export default function LoginPage() {
   const [error, setError] = useState<string | null>(null);
   const [info, setInfo] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
+  const [classic, setClassic] = useState<boolean | null>(null);
+
+  useEffect(() => {
+    try {
+      setClassic(localStorage.getItem(CLASSIC_KEY) === "1");
+    } catch {
+      setClassic(false);
+    }
+  }, []);
+
+  function toggle(on: boolean) {
+    setClassic(on);
+    try {
+      localStorage.setItem(CLASSIC_KEY, on ? "1" : "0");
+    } catch {}
+  }
 
   const next = () => {
     const target = new URLSearchParams(window.location.search).get("next");
@@ -54,8 +73,25 @@ export default function LoginPage() {
     setBusy(false);
   }
 
+  if (classic === null) return null;
+
+  if (!classic) {
+    return (
+      <main className="container stack">
+        <button className="link small welcome-toggle" onClick={() => toggle(true)}>
+          Normales Formular
+        </button>
+        <Welcome />
+        <LegalFooter />
+      </main>
+    );
+  }
+
   return (
     <main className="container stack">
+      <button className="link small welcome-toggle" onClick={() => toggle(false)}>
+        Mit Professorin Kiesel
+      </button>
       <form className="card login stack" onSubmit={submit}>
         <h1>Challengemon</h1>
         <p className="muted small" style={{ margin: 0 }}>

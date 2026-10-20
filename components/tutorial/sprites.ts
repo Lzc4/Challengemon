@@ -57,6 +57,67 @@ export const PROFESSOR: Sprite = {
   },
 };
 
+// der dev, als rivale
+export const RIVAL_NAME = "LUCA";
+
+export const RIVAL: Sprite = {
+  rows: [
+    "........................",
+    "..........kkkkkk........",
+    "........kkccccccCk......",
+    ".......kcGGcccccCCk.....",
+    "......kcGccccccccCCk....",
+    "......kccccccccccCCkkk..",
+    ".....kCCCCCCCCCCCCCcCCk.",
+    "....kkhhhhhhhhhhhhhkkkk.",
+    "...khhhhhHhhhhhHhhhhhk..",
+    "..khhhHhhhhhHhhhhhHhhhk.",
+    "...khhshhhsshhhsshhshk..",
+    "..khhsssshssssshssshhk..",
+    "...khskkksssssskkksshk..",
+    "...khsskksssssskksshk...",
+    "...khsswwkssssswwkshk...",
+    "...khsswkkssssswkkshk...",
+    "....ksssssssSssssssk....",
+    "....krssssssSSsssssrk...",
+    ".....kssssskkkkmsssk....",
+    "......kSsssssssssSk.....",
+    ".......kkSSSSSSSkk......",
+    ".....kkpPkkSSSkkPpkk....",
+    "....kbbpPpkbgbkpPpbbk...",
+    "...kbBbbppppppppbbBbbk..",
+    "...kbBbbbbkwbkwbbbbBbk..",
+    "..kbbBbbbbkwbkwbbbbBbbk.",
+    "..kbbBbkkkkkkkkkkkbBbbk.",
+    "..kbbkssskdddddkssskbbk.",
+    "..kbbkssskdlllldkssskbk.",
+    "..kbbbkkkkdlLlldkkkkbbk.",
+    "...kbbbbbkddddddkbbbbk..",
+    "....kkkkkkkkkkkkkkkkk...",
+  ],
+  palette: {
+    k: INK,
+    c: "#9bdc5c",
+    C: "#5d9a36",
+    G: "#dcfabe",
+    h: "#2e2a3a",
+    H: "#4a4560",
+    s: "#f2c9a0",
+    S: "#d9a27b",
+    w: "#fafafa",
+    r: "#f0968c",
+    m: "#a0524a",
+    p: "#c9d0d6",
+    P: "#8c96a0",
+    b: "#2b3440",
+    B: "#3f4c5c",
+    g: "#9bdc5c",
+    d: "#ffb347",
+    l: "#bfe3ff",
+    L: "#9bdc5c",
+  },
+};
+
 export const CHIPPY: Sprite = {
   rows: [
     "........yy......",
