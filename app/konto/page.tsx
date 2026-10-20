@@ -5,6 +5,7 @@ import Nav from "@/components/Nav";
 import LegalFooter from "@/components/LegalFooter";
 import { supabase } from "@/lib/supabase/client";
 import { useMyProfile, useUser } from "@/lib/hooks";
+import { REPLAY_EVENT } from "@/components/tutorial/Tutorial";
 
 export default function AccountPage() {
   const user = useUser();
@@ -71,6 +72,13 @@ export default function AccountPage() {
             <button className="primary">Ändern</button>
           </div>
         </form>
+        <div className="card stack">
+          <strong>Tutorial</strong>
+          <span className="small muted">Professorin Kiesel erklärt dir die Seite gern nochmal.</span>
+          <div>
+            <button onClick={() => window.dispatchEvent(new Event(REPLAY_EVENT))}>Tutorial nochmal ansehen</button>
+          </div>
+        </div>
         <div className="card stack">
           <strong>Konto löschen</strong>
           <span className="small muted">

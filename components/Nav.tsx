@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { supabase } from "@/lib/supabase/client";
 import { useMyProfile } from "@/lib/hooks";
+import Tutorial from "./tutorial/Tutorial";
 
 export default function Nav() {
   const me = useMyProfile();
@@ -17,15 +18,26 @@ export default function Nav() {
       <Link href="/" className="brand">
         Challengemon
       </Link>
-      <Link href="/">Runs</Link>
-      <Link href="/library">Bibliothek</Link>
-      <Link href="/speicher">Speicher</Link>
-      <Link href="/spiele">Spiele</Link>
-      <Link href="/statistik">Statistik</Link>
+      <Link href="/" data-tour="runs">
+        Runs
+      </Link>
+      <Link href="/library" data-tour="bibliothek">
+        Bibliothek
+      </Link>
+      <Link href="/speicher" data-tour="speicher">
+        Speicher
+      </Link>
+      <Link href="/spiele" data-tour="spiele">
+        Spiele
+      </Link>
+      <Link href="/statistik" data-tour="statistik">
+        Statistik
+      </Link>
       <Link href="/konto" className="muted small">
         {me?.name ?? ""}
       </Link>
       <button onClick={logout}>Logout</button>
+      <Tutorial />
     </nav>
   );
 }
