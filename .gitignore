@@ -10,3 +10,5 @@ next-env.d.ts
 *.sav
 *.rnqs
 .vercel
+deploy/.service-key
+deploy/docker-compose.override.yml
