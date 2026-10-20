@@ -4,7 +4,7 @@ Nuzlocke- und Soullocke-Runs im Browser. Jeder bringt seine eigenen Spiele und s
 
 ## Prinzip
 
-- **ROMs, Randomizer-Patches und Spielstände** liegen im Speicher des Users: Browser (IndexedDB), Google Drive, Dropbox, S3-kompatibel oder WebDAV. Der Browser spricht direkt mit dem Anbieter, Zugangsdaten bleiben im Browser.
+- **ROMs, Randomizer-Patches und Spielstände** liegen im Speicher des Users: Browser (IndexedDB), Google Drive, Nextcloud, S3-kompatibel oder WebDAV. Der Browser spricht direkt mit dem Anbieter, Zugangsdaten bleiben im Browser.
 - **Der Server** speichert nur Konten, Runs, Tracker, Chat, Live-Status und Verwaltungsdaten (Dateiname, Größe, CRC32).
 - **Randomizer:** Universal Pokemon Randomizer ZX 4.6.1 mit festem Seed.
   - Im Browser über CheerpJ (15–60 s je nach Spiel).
@@ -31,9 +31,12 @@ Caddy lauscht nur auf `127.0.0.1:8090`. TLS macht ein vorhandener nginx mit cert
 | Variable | Zweck | Einrichtung |
 |---|---|---|
 | `NEXT_PUBLIC_GOOGLE_CLIENT_ID` | Google Drive | Google Cloud Console: OAuth-Client „Webanwendung“, Origin = Seite, Scope `drive.file`, Drive API aktivieren |
-| `NEXT_PUBLIC_DROPBOX_APP_KEY` | Dropbox | Dropbox App Console: App-Ordner-Zugriff, Redirect `https://<SITE_DOMAIN>/speicher/dropbox`, Permissions `files.content.read/write`, PKCE |
 | `NEXT_PUBLIC_GITHUB_CLIENT_ID` | Online-Randomizer | GitHub OAuth App mit aktiviertem Device Flow. Ohne diese Variable können User einen Personal Access Token eintragen |
 | `NEXT_PUBLIC_OPERATOR_NAME`, `NEXT_PUBLIC_OPERATOR_ADDRESS`, `NEXT_PUBLIC_CONTACT_EMAIL`, `NEXT_PUBLIC_HOSTING_NOTE` | Datenschutzerklärung | |
+
+## Nextcloud
+
+Braucht keine Einrichtung auf unserer Seite. Der User installiert in seiner Nextcloud (ab Version 32) die App [WebAppPassword](https://apps.nextcloud.com/apps/webapppassword) und trägt die Seite als WebDAV-Origin ein. Login läuft per Popup auf der Nextcloud, die App schickt ein 24 h gültiges Token per `postMessage` zurück und setzt CORS für WebDAV. Unser Server ist daran nicht beteiligt.
 
 ## Randomizer-Dateien
 

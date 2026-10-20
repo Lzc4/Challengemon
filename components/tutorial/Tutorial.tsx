@@ -5,7 +5,7 @@ import { createPortal } from "react-dom";
 import { supabase } from "@/lib/supabase/client";
 import { configureStorage } from "@/lib/userStorage";
 import { googleClientId, googleToken } from "@/lib/userStorage/gdrive";
-import { dropboxAppKey, startDropboxLogin } from "@/lib/userStorage/dropbox";
+import { connectNextcloud } from "@/lib/userStorage/nextcloud";
 import Dialog, { SoundToggle } from "./Dialog";
 import { sfx } from "./sfx";
 import PixelSprite from "./PixelSprite";
@@ -17,7 +17,7 @@ export const REPLAY_EVENT = "cm-tutorial-replay";
 
 type Line = { text: string; spot?: string; rival?: boolean };
 
-type StarterId = "local" | "gdrive" | "dropbox";
+type StarterId = "local" | "gdrive" | "nextcloud";
 
 interface Starter {
   id: StarterId;
@@ -49,13 +49,13 @@ const STARTERS: Starter[] = [
     available: () => !!googleClientId(),
   },
   {
-    id: "dropbox",
+    id: "nextcloud",
     name: "KISTLING",
-    type: "Box",
+    type: "Server",
     sprite: KISTLING,
-    blurb: "Kuschelt sich in einen eigenen Ordner deiner Dropbox. Auf allen Geräten verfügbar.",
-    after: "Kistling springt kurz zu Dropbox rüber, damit du ihm die Erlaubnis gibst. Bis gleich!",
-    available: () => !!dropboxAppKey(),
+    blurb: "Zieht bei deiner eigenen Nextcloud ein. Open Source, auf allen Geräten verfügbar, und die Daten bleiben bei dir zuhause.",
+    after: "Kistling hat sich in deiner Nextcloud ein gemütliches Plätzchen gesucht. Der Zugang gilt immer 24 Stunden, danach reicht ein Klick zum Verlängern.",
+    available: () => true,
   },
 ];
 
@@ -114,7 +114,8 @@ export default function Tutorial() {
   const [open, setOpen] = useState(false);
   const [name, setName] = useState("Trainer");
   const [step, setStep] = useState(0);
-  const [phase, setPhase] = useState<"talk" | "pick" | "confirm" | "after" | "end">("talk");
+  const [phase, setPhase] = useState<"talk" | "pick" | "confirm" | "server" | "after" | "end">("talk");
+  const [server, setServer] = useState("");
   const [pick, setPick] = useState(0);
   const [error, setError] = useState<string | null>(null);
   const [met, setMet] = useState(false);
@@ -202,16 +203,22 @@ export default function Tutorial() {
         await googleToken(true);
         configureStorage({ kind: "gdrive" });
       }
-      if (starter.id === "dropbox") {
-        await finish();
-        configureStorage({ kind: "dropbox" }, false);
-        await startDropboxLogin("/library");
-        return;
-      }
+      if (starter.id === "nextcloud") return setPhase("server");
       setPhase("after");
     } catch (err) {
       setError(err instanceof Error ? err.message : String(err));
       setPhase("pick");
+    }
+  }
+
+  async function connectServer(e: React.FormEvent) {
+    e.preventDefault();
+    setError(null);
+    try {
+      configureStorage(await connectNextcloud(server));
+      setPhase("after");
+    } catch (err) {
+      setError(err instanceof Error ? err.message : String(err));
     }
   }
 
@@ -285,6 +292,33 @@ export default function Tutorial() {
                 NEIN
               </button>
             </div>
+          </Dialog>
+        )}
+        {phase === "server" && (
+          <Dialog
+            key={`server-${error ?? ""}`}
+            text={error ? `Hm, das hat nicht geklappt. ${error}` : "Wie lautet die Adresse deiner Nextcloud? Gleich geht ein Fenster auf, da meldest du dich ganz normal an."}
+          >
+            <form className="tut-form" onSubmit={connectServer}>
+              <input placeholder="z. B. cloud.example.de" value={server} onChange={(e) => setServer(e.target.value)} required autoFocus />
+              <div className="tut-form-row">
+                <button
+                  type="button"
+                  data-sfx="back"
+                  className="link small"
+                  onClick={() => {
+                    setError(null);
+                    setPhase("pick");
+                  }}
+                >
+                  Zurück
+                </button>
+                <button type="button" className="link small" onClick={() => finish("/speicher")}>
+                  Noch nicht eingerichtet? Zur Anleitung
+                </button>
+                <button className="tut-go">VERBINDEN ▶</button>
+              </div>
+            </form>
           </Dialog>
         )}
         {phase === "after" && <Dialog key="after" text={starter.after} onNext={() => setPhase("end")} />}

@@ -2675,3 +2675,37 @@ pre.code {
 input[type="file"]::file-selector-button {
   font: inherit;
 }
+
+.banner {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  padding: 10px 16px;
+  color: #1b1b22;
+  background: var(--amber);
+  font-size: 0.9rem;
+}
+
+.banner .primary {
+  padding: 4px 12px;
+  color: var(--text);
+  background: #1b1b22;
+  box-shadow: none;
+}
+
+.steps {
+  margin: 8px 0 0;
+  padding-left: 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.steps code {
+  padding: 1px 6px;
+  background: rgba(255, 255, 255, 0.08);
+  border-radius: 4px;
+  word-break: break-all;
+}

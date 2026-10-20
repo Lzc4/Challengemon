@@ -66,7 +66,7 @@ export async function randomizeOnGithub(run: Run, player: RunPlayer, base: Libra
   if (!run.settings) throw new Error("Der Run hat keine Randomizer-Settings");
   const provider = providerFor(base.provider as ProviderKind);
   if (!provider?.remoteRead || !provider.remoteWrite) {
-    throw new Error("Für GitHub muss die Basis-ROM in einem Online-Speicher liegen (Google Drive, Dropbox oder S3). WebDAV-Passwörter geben wir aus Sicherheitsgründen nicht an GitHub weiter.");
+    throw new Error("Für GitHub muss die Basis-ROM in einem Online-Speicher liegen (Google Drive oder S3). Nextcloud- und WebDAV-Zugänge geben wir aus Sicherheitsgründen nicht an GitHub weiter.");
   }
   await ensureRandomizerRepo(onStage);
   const path = patchPath(run.id, player.user_id);

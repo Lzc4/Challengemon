@@ -82,7 +82,7 @@ export default function AccountPage() {
         <div className="card stack">
           <strong>Konto löschen</strong>
           <span className="small muted">
-            Löscht dein Konto, deine Bibliothekseinträge und deine Daten in allen Runs. Deine Dateien in Google Drive, Dropbox usw. liegen in deinem
+            Löscht dein Konto, deine Bibliothekseinträge und deine Daten in allen Runs. Deine Dateien in Google Drive, Nextcloud usw. liegen in deinem
             eigenen Speicher und bleiben dort, bis du sie selbst löschst.
           </span>
           <div>

@@ -120,7 +120,7 @@ export default function RandomizerPanel({
                   Schwaches Gerät? <Link href="/speicher">GitHub verbinden</Link>, dann läuft es online in deinem Account.
                 </span>
               )}
-              {gh && !remote && <span className="small muted">Für GitHub muss deine Basis-ROM in Google Drive, Dropbox oder S3 liegen.</span>}
+              {gh && !remote && <span className="small muted">Für GitHub muss deine Basis-ROM in Google Drive oder S3 liegen.</span>}
             </div>
           )}
           <span className="small muted">

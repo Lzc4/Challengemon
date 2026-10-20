@@ -25,7 +25,7 @@ export default function TermsPage() {
         </li>
         <li>
           Deine Dateien (ROMs, Randomizer-Patches, Spielstände) liegen in dem Speicher, den du selbst auswählst: in deinem Browser, deinem Google
-          Drive, deiner Dropbox, deinem S3-Bucket oder deinem WebDAV-Server. Die Übertragung läuft direkt zwischen deinem Browser und diesem
+          Drive, deiner Nextcloud, deinem S3-Bucket oder deinem WebDAV-Server. Die Übertragung läuft direkt zwischen deinem Browser und diesem
           Speicher. Für ihn gelten die Bedingungen des jeweiligen Anbieters.
         </li>
         <li>

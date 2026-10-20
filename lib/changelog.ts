@@ -9,11 +9,24 @@ export interface Release {
 
 export const CHANGELOG: Release[] = [
   {
+    version: "1.1",
+    date: "2026-10-20",
+    title: "Professorin Kiesel",
+    changes: [
+      { kind: "neu", text: "Tutorial beim ersten Login mit Professorin Kiesel und Starter-Wahl für deinen Speicher" },
+      { kind: "neu", text: "Login und Registrierung als Gespräch, das normale Formular gibt es weiterhin" },
+      { kind: "neu", text: "Rivale Lzc4 mischt mit" },
+      { kind: "neu", text: "Nextcloud als Speicher mit Login per Klick (braucht die App WebAppPassword)" },
+      { kind: "besser", text: "Pixel-Schrift auf der ganzen Seite und Sounds für die Textboxen" },
+      { kind: "besser", text: "Dropbox entfernt" },
+    ],
+  },
+  {
     version: "1.0",
     date: "2026-10-19",
     title: "Challengemon",
     changes: [
-      { kind: "neu", text: "Eigene Bibliothek: Jeder bringt seine eigenen Spiele mit, gespeichert im eigenen Speicher (Gerät, Google Drive, Dropbox, S3 oder WebDAV)" },
+      { kind: "neu", text: "Eigene Bibliothek: Jeder bringt seine eigenen Spiele mit, gespeichert im eigenen Speicher (Gerät, Google Drive, S3 oder WebDAV)" },
       { kind: "neu", text: "Randomizer direkt im Browser oder im eigenen GitHub-Account, wahlweise gleiche ROM für alle oder eigene ROM pro Spieler" },
       { kind: "neu", text: "Randomisierte Runs speichern nur einen kleinen Patch, die ROM wird lokal zusammengebaut" },
       { kind: "neu", text: "Runs mit Einladungslink, Chat pro Run" },

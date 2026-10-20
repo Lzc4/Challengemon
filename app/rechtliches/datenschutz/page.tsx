@@ -60,7 +60,7 @@ export default function PrivacyPage() {
           geladen, wenn du im Browser randomisierst. Dabei wird deine IP-Adresse übertragen.
         </li>
         <li>
-          <strong>Google Drive, Dropbox, S3- oder WebDAV-Anbieter:</strong> nur wenn du sie selbst verbindest. Es gelten die Datenschutzhinweise
+          <strong>Google Drive, Nextcloud, S3- oder WebDAV-Anbieter:</strong> nur wenn du sie selbst verbindest. Es gelten die Datenschutzhinweise
           des jeweiligen Anbieters, mit dem du einen eigenen Vertrag hast.
         </li>
         <li>

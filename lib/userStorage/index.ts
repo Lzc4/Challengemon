@@ -3,10 +3,10 @@
 import { useEffect, useState } from "react";
 import { localProvider } from "./local";
 import { forgetGoogle, gdriveProvider } from "./gdrive";
-import { dropboxConnected, dropboxProvider } from "./dropbox";
+import { nextcloudProvider } from "./nextcloud";
 import { s3Provider } from "./s3";
 import { webdavProvider } from "./webdav";
-import type { ProviderKind, StorageConfig, StorageProvider } from "./types";
+import { PROVIDER_LABEL, type ProviderKind, type StorageConfig, type StorageProvider } from "./types";
 
 export * from "./types";
 
@@ -50,13 +50,13 @@ export function forgetStorage(kind: ProviderKind) {
 }
 
 export function activeKind(): ProviderKind {
-  return read().active;
+  const k = read().active;
+  return k in PROVIDER_LABEL ? k : "local";
 }
 
 export function configuredKinds(): ProviderKind[] {
   const s = read();
-  const kinds = Object.keys(s.configs) as ProviderKind[];
-  if (dropboxConnected() && !kinds.includes("dropbox")) kinds.push("dropbox");
+  const kinds = (Object.keys(s.configs) as ProviderKind[]).filter((k) => k in PROVIDER_LABEL);
   return kinds.includes("local") ? kinds : ["local", ...kinds];
 }
 
@@ -67,12 +67,14 @@ export function providerFor(kind: ProviderKind): StorageProvider | null {
       return localProvider();
     case "gdrive":
       return c ? gdriveProvider() : null;
-    case "dropbox":
-      return c || dropboxConnected() ? dropboxProvider() : null;
+    case "nextcloud":
+      return c && c.kind === "nextcloud" ? nextcloudProvider(c) : null;
     case "s3":
       return c && c.kind === "s3" ? s3Provider(c) : null;
     case "webdav":
       return c && c.kind === "webdav" ? webdavProvider(c) : null;
+    default:
+      return null;
   }
 }
 

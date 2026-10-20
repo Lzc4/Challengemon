@@ -36,6 +36,7 @@ export function webdavProvider(c: WebdavConfig): StorageProvider {
     },
     async list(prefix) {
       const res = await fetch(url(prefix), { method: "PROPFIND", headers: { ...auth, Depth: "1" } });
+      if (res.status === 401) throw new Error("WebDAV hat den Zugang abgelehnt (401)");
       if (!res.ok) return [];
       const xml = new DOMParser().parseFromString(await res.text(), "application/xml");
       const out: { path: string; size: number }[] = [];
