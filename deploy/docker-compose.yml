@@ -2,6 +2,7 @@ name: challengemon
 
 services:
   db:
+    mem_limit: 512m
     image: public.ecr.aws/docker/library/postgres:16-alpine
     restart: unless-stopped
     command: ["postgres", "-c", "wal_level=logical", "-c", "max_connections=100", "-c", "shared_buffers=128MB"]
@@ -17,6 +18,7 @@ services:
       retries: 20
 
   auth:
+    mem_limit: 128m
     image: public.ecr.aws/supabase/gotrue:v2.177.0
     restart: unless-stopped
     depends_on:
@@ -25,7 +27,7 @@ services:
     environment:
       GOTRUE_API_HOST: 0.0.0.0
       PORT: 9999
-      API_EXTERNAL_URL: https://${API_DOMAIN}
+      API_EXTERNAL_URL: https://${SITE_DOMAIN}/auth/v1
       GOTRUE_DB_DRIVER: postgres
       GOTRUE_DB_DATABASE_URL: postgres://supabase_auth_admin:${POSTGRES_PASSWORD}@db:5432/challengemon?search_path=auth
       GOTRUE_SITE_URL: https://${SITE_DOMAIN}
@@ -48,6 +50,7 @@ services:
       GOTRUE_RATE_LIMIT_EMAIL_SENT: 30
 
   rest:
+    mem_limit: 128m
     image: public.ecr.aws/supabase/postgrest:v12.2.12
     restart: unless-stopped
     depends_on:
@@ -61,6 +64,7 @@ services:
       PGRST_DB_USE_LEGACY_GUCS: "false"
 
   realtime:
+    mem_limit: 512m
     image: public.ecr.aws/supabase/realtime:v2.34.47
     restart: unless-stopped
     depends_on:
@@ -85,10 +89,11 @@ services:
       RUN_JANITOR: "true"
 
   app:
+    mem_limit: 384m
     build:
       context: ..
       args:
-        NEXT_PUBLIC_SUPABASE_URL: https://${API_DOMAIN}
+        NEXT_PUBLIC_SUPABASE_URL: https://${SITE_DOMAIN}
         NEXT_PUBLIC_SUPABASE_ANON_KEY: ${ANON_KEY}
         NEXT_PUBLIC_GOOGLE_CLIENT_ID: ${GOOGLE_CLIENT_ID:-}
         NEXT_PUBLIC_DROPBOX_APP_KEY: ${DROPBOX_APP_KEY:-}
@@ -99,24 +104,19 @@ services:
         NEXT_PUBLIC_HOSTING_NOTE: ${HOSTING_NOTE:-}
     restart: unless-stopped
     environment:
-      NEXT_PUBLIC_SUPABASE_URL: https://${API_DOMAIN}
+      NEXT_PUBLIC_SUPABASE_URL: https://${SITE_DOMAIN}
       NEXT_PUBLIC_SUPABASE_ANON_KEY: ${ANON_KEY}
       NEXT_PUBLIC_GITHUB_CLIENT_ID: ${GITHUB_CLIENT_ID:-}
 
   caddy:
+    mem_limit: 64m
     image: public.ecr.aws/docker/library/caddy:2-alpine
     restart: unless-stopped
     depends_on: [auth, rest, realtime, app]
     ports:
-      - "80:80"
-      - "443:443"
-    environment:
-      API_DOMAIN: ${API_DOMAIN}
-      SITE_DOMAIN: ${SITE_DOMAIN}
+      - "127.0.0.1:${PROXY_PORT:-8090}:8090"
     volumes:
       - ./Caddyfile:/etc/caddy/Caddyfile:ro
-      - caddy:/data
 
 volumes:
   db:
-  caddy:

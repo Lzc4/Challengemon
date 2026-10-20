@@ -1,15 +1,10 @@
-{$API_DOMAIN} {
-	header {
-		Access-Control-Allow-Origin https://{$SITE_DOMAIN}
-		Access-Control-Allow-Headers "authorization, apikey, content-type, x-client-info, prefer, range, accept-profile, content-profile, x-supabase-api-version"
-		Access-Control-Allow-Methods "GET, POST, PUT, PATCH, DELETE, OPTIONS"
-		Access-Control-Expose-Headers "Content-Range, X-Total-Count"
-		Access-Control-Allow-Credentials true
-		defer
-	}
-	@options method OPTIONS
-	respond @options 204
+# laeuft nur intern, tls macht nginx/certbot davor
+{
+	auto_https off
+	admin off
+}
 
+:8090 {
 	handle_path /auth/v1/* {
 		reverse_proxy auth:9999
 	}
@@ -22,10 +17,8 @@
 			header_up Host realtime-dev.localhost
 		}
 	}
-	respond 404
-}
-
-{$SITE_DOMAIN} {
-	encode zstd gzip
-	reverse_proxy app:3000
+	handle {
+		encode zstd gzip
+		reverse_proxy app:3000
+	}
 }

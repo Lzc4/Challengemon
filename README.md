@@ -12,18 +12,19 @@ Nuzlocke- und Soullocke-Runs im Browser. Jeder bringt seine eigenen Spiele und s
   - Beide Wege erzeugen bei gleichem Seed und gleicher Basis-ROM bytegleiche ROMs. Gespeichert wird nur ein BPS-Patch (ca. 100–200 KB).
 - **Grafiken** (Karte, Pokémon-Icons Gen 4 und 5) werden aus der ROM des Users erzeugt und nur lokal zwischengespeichert.
 
-## Backend selbst hosten (`deploy/`)
+## Selbst hosten (`deploy/`)
 
-Schlanker Supabase-kompatibler Stack: Postgres 16, GoTrue (Auth), PostgREST, Realtime, Caddy (TLS), App. Er braucht zusammen etwa 1 GB RAM.
+Postgres 16, GoTrue (Auth), PostgREST, Realtime, die App und ein interner Caddy, alles per Docker Compose. Zusammen etwa 1 GB RAM, mit Speicherlimits pro Container. Alles läuft unter einer Domain: `/auth/v1`, `/rest/v1` und `/realtime/v1` sind das Backend, `/` ist die App.
 
-1. DNS: `SITE_DOMAIN` und `API_DOMAIN` auf den Server zeigen lassen.
-2. `cd deploy && cp .env.example .env`, dann `node make-keys.mjs` ausführen und die Werte in `.env` eintragen. Dazu die Domains und die SMTP-Daten für Bestätigungsmails.
+Caddy lauscht nur auf `127.0.0.1:8090`. TLS macht ein vorhandener nginx mit certbot davor (`deploy/nginx-challengemon.conf`).
+
+1. A-Record für die Domain auf den Server zeigen lassen.
+2. `cd deploy && cp .env.example .env`, dann `node make-keys.mjs` ausführen und die Werte in `.env` eintragen. Dazu `SITE_DOMAIN` und die SMTP-Daten.
 3. `docker compose up -d db auth rest realtime`
-4. Sobald `docker compose logs auth` „migrations applied“ meldet, das App-Schema einspielen:
+4. Sobald `docker compose logs auth` „migrations applied“ meldet, das Schema einspielen:
    `docker compose exec -T db psql -U postgres -d challengemon < ../supabase/migrations/0001_challengemon.sql`
 5. `docker compose up -d --build app caddy`
-
-Die App läuft alternativ auch auf Vercel. Dann `NEXT_PUBLIC_SUPABASE_URL=https://<API_DOMAIN>` und `NEXT_PUBLIC_SUPABASE_ANON_KEY` setzen und `app` aus dem Compose weglassen.
+6. `nginx-challengemon.conf` nach `/etc/nginx/sites-available/` kopieren und aktivieren, `nginx -t && systemctl reload nginx`, danach `certbot --nginx -d <domain>`.
 
 ## Optionale Integrationen
 
