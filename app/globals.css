@@ -2709,3 +2709,44 @@ input[type="file"]::file-selector-button {
   border-radius: 4px;
   word-break: break-all;
 }
+
+.invites {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.invites li {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 10px;
+}
+
+.invites code {
+  padding: 3px 8px;
+  letter-spacing: 1px;
+  background: rgba(255, 255, 255, 0.06);
+  border-radius: 4px;
+}
+
+.invites button.small {
+  padding: 3px 10px;
+  font-size: 0.8rem;
+}
+
+.meter {
+  height: 6px;
+  background: rgba(255, 255, 255, 0.08);
+  border-radius: 3px;
+  overflow: hidden;
+}
+
+.meter span {
+  display: block;
+  height: 100%;
+  background: var(--accent);
+}

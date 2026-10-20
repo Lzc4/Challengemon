@@ -66,7 +66,12 @@ export default function LibraryPage() {
       setOwn(false);
       await load();
     } catch (err) {
-      setError(err instanceof Error ? err.message : String(err));
+      const msg = err instanceof Error ? err.message : String(err);
+      // die cloud kennt nur dateinamen, hier haben wir den spieltitel
+      setError(msg.replace(/„([^“]+)“/, (m, file: string) => {
+          const title = roms.find((r) => r.path.endsWith(file))?.title;
+          return title ? `„${title}“` : m;
+        }));
     } finally {
       setProgress(null);
     }

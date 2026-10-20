@@ -12,3 +12,4 @@ next-env.d.ts
 .vercel
 deploy/.service-key
 deploy/docker-compose.override.yml
+.cloud-data

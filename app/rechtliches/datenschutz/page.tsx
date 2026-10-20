@@ -4,7 +4,7 @@ export const metadata = { title: "Datenschutz · Challengemon" };
 
 export default function PrivacyPage() {
   return (
-    <LegalPage title="Datenschutzerklärung" updated="19.10.2026">
+    <LegalPage title="Datenschutzerklärung" updated="20.10.2026">
       <h2>1. Verantwortlicher</h2>
       <p>
         {OPERATOR.name || "[Name wird ergänzt]"}
@@ -16,9 +16,9 @@ export default function PrivacyPage() {
 
       <h2>2. Das Grundprinzip</h2>
       <p>
-        Challengemon ist so gebaut, dass möglichst wenig bei uns landet. Spieldateien, Randomizer-Patches und Spielstände speicherst du in deinem
-        eigenen Speicher. Dein Browser überträgt sie direkt dorthin, ohne Umweg über unseren Server. Zugangsdaten zu deinem Speicher und zu GitHub
-        bleiben in deinem Browser.
+        Challengemon ist so gebaut, dass möglichst wenig bei uns landet. Du entscheidest, wo deine Spieldateien, Randomizer-Patches und Spielstände
+        liegen: in der Challengemon-Cloud auf unserem Server oder in deinem eigenen Speicher. Beim eigenen Speicher überträgt dein Browser die Dateien
+        direkt dorthin, ohne Umweg über unseren Server. Zugangsdaten zu deinem Speicher und zu GitHub bleiben in deinem Browser.
       </p>
 
       <h2>3. Was wir verarbeiten</h2>
@@ -33,8 +33,16 @@ export default function PrivacyPage() {
           jeweiligen Runs (Art. 6 Abs. 1 lit. b DSGVO).
         </li>
         <li>
-          <strong>Verwaltungsdaten deiner Dateien:</strong> Dateiname bzw. Pfad, Größe, Prüfsumme (CRC32), Spielcode und die Art des Speichers. Die
-          Dateien selbst erhalten wir nicht.
+          <strong>Verwaltungsdaten deiner Dateien:</strong> Dateiname bzw. Pfad, Größe, Prüfsumme (CRC32), Spielcode und die Art des Speichers.
+        </li>
+        <li>
+          <strong>Challengemon-Cloud:</strong> nur wenn du sie als Speicher wählst. Dann speichern wir die Dateien, die du hochlädst (eine Spieldatei,
+          Randomizer-Patches, Spielstände), auf unserem Server. Nur dein Konto hat Zugriff. Zweck: Bereitstellung des Speichers (Art. 6 Abs. 1 lit. b
+          DSGVO). Die Dateien werden gelöscht, wenn du sie entfernst oder dein Konto löschst.
+        </li>
+        <li>
+          <strong>Einladungen:</strong> welcher Code von wem erstellt und von wem eingelöst wurde. Zweck: Begrenzung des Zugangs in der Startphase
+          (Art. 6 Abs. 1 lit. f DSGVO).
         </li>
         <li>
           <strong>Server-Logs:</strong> Beim Aufruf der Seite verarbeitet der Hoster technisch notwendig deine IP-Adresse, Zeitpunkt, aufgerufene
@@ -82,7 +90,7 @@ export default function PrivacyPage() {
 
       <h2>7. Speicherdauer</h2>
       <p>
-        Kontodaten speichern wir, bis du dein Konto löschst. Run-Daten bleiben erhalten, solange der Run existiert. Wer einen Run verlässt oder sein
+        Kontodaten und Dateien in der Challengemon-Cloud speichern wir, bis du sie bzw. dein Konto löschst. Run-Daten bleiben erhalten, solange der Run existiert. Wer einen Run verlässt oder sein
         Konto löscht, dessen Daten in diesem Run werden mitgelöscht. Ältere Spielstand-Einträge werden automatisch aufgeräumt.
       </p>
 

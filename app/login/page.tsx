@@ -5,6 +5,7 @@ import { useEffect, useState } from "react";
 import { supabase } from "@/lib/supabase/client";
 import LegalFooter from "@/components/LegalFooter";
 import Welcome from "@/components/tutorial/Welcome";
+import { inviteFromUrl, inviteOnly, normalizeInvite, signupError } from "@/lib/invites";
 
 const CLASSIC_KEY = "cm.login.classic";
 
@@ -20,8 +21,13 @@ export default function LoginPage() {
   const [info, setInfo] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
   const [classic, setClassic] = useState<boolean | null>(null);
+  const [invite, setInvite] = useState("");
+  const [needInvite, setNeedInvite] = useState(true);
 
   useEffect(() => {
+    setInvite(inviteFromUrl());
+    if (inviteFromUrl()) setMode("signup");
+    void inviteOnly().then(setNeedInvite).catch(() => null);
     try {
       setClassic(localStorage.getItem(CLASSIC_KEY) === "1");
     } catch {
@@ -60,9 +66,9 @@ export default function LoginPage() {
       const { data, error } = await client.auth.signUp({
         email: email.trim(),
         password,
-        options: { data: { name: name.trim() }, emailRedirectTo: `${window.location.origin}${next()}` },
+        options: { data: { name: name.trim(), invite: normalizeInvite(invite) }, emailRedirectTo: `${window.location.origin}${next()}` },
       });
-      if (error) setError(error.message);
+      if (error) setError(signupError(error.message));
       else if (data.session) window.location.href = next();
       else setInfo("Fast geschafft! Bestätige deine E-Mail-Adresse über den Link, den wir dir geschickt haben.");
     } else {
@@ -113,6 +119,12 @@ export default function LoginPage() {
           <label>
             Anzeigename
             <input type="text" value={name} onChange={(e) => setName(e.target.value)} required minLength={2} maxLength={20} autoComplete="nickname" />
+          </label>
+        )}
+        {mode === "signup" && needInvite && (
+          <label>
+            Einladungscode
+            <input value={invite} onChange={(e) => setInvite(e.target.value)} required autoComplete="off" placeholder="z. B. AB12C-34DEF" />
           </label>
         )}
         {mode !== "reset" && (

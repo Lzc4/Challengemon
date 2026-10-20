@@ -1,11 +1,11 @@
 # Challengemon
 
-Nuzlocke- und Soullocke-Runs im Browser. Jeder bringt seine eigenen Spiele und seinen eigenen Speicher mit, der Server sieht keine Spieldateien.
+Nuzlocke- und Soullocke-Runs im Browser. Jeder bringt seine eigenen Spiele mit. Registrierung nur mit Einladung.
 
 ## Prinzip
 
-- **ROMs, Randomizer-Patches und Spielstände** liegen im Speicher des Users: Browser (IndexedDB), Google Drive, Nextcloud, S3-kompatibel oder WebDAV. Der Browser spricht direkt mit dem Anbieter, Zugangsdaten bleiben im Browser.
-- **Der Server** speichert nur Konten, Runs, Tracker, Chat, Live-Status und Verwaltungsdaten (Dateiname, Größe, CRC32).
+- **ROMs, Randomizer-Patches und Spielstände** liegen entweder in der **Challengemon-Cloud** (auf dem Server, pro User ein Spiel und 256 MB für Spielstände) oder im Speicher des Users: Browser (IndexedDB), Google Drive, Nextcloud, S3-kompatibel oder WebDAV. Bei eigenem Speicher spricht der Browser direkt mit dem Anbieter, Zugangsdaten bleiben im Browser.
+- **Der Server** speichert Konten, Runs, Tracker, Chat, Live-Status, Verwaltungsdaten (Dateiname, Größe, CRC32), Einladungen und die Dateien der Challengemon-Cloud.
 - **Randomizer:** Universal Pokemon Randomizer ZX 4.6.1 mit festem Seed.
   - Im Browser über CheerpJ (15–60 s je nach Spiel).
   - Oder als GitHub Action in einem privaten Repo im Account des Users (`challengemon-randomizer`, wird automatisch angelegt).
@@ -22,7 +22,8 @@ Caddy lauscht nur auf `127.0.0.1:8090`. TLS macht ein vorhandener nginx mit cert
 2. `cd deploy && cp .env.example .env`, dann `node make-keys.mjs` ausführen und die Werte in `.env` eintragen. Dazu `SITE_DOMAIN` und die SMTP-Daten.
 3. `docker compose up -d db auth rest realtime`
 4. Sobald `docker compose logs auth` „migrations applied“ meldet, das Schema einspielen:
-   `docker compose exec -T db psql -U postgres -d challengemon < ../supabase/migrations/0001_challengemon.sql`
+   `for f in ../supabase/migrations/*.sql; do docker compose exec -T db psql -U postgres -d challengemon < $f; done`
+   Danach `docker compose restart rest`, damit PostgREST die neuen Funktionen kennt.
 5. `docker compose up -d --build app caddy`
 6. `nginx-challengemon.conf` nach `/etc/nginx/sites-available/` kopieren und aktivieren, `nginx -t && systemctl reload nginx`, danach `certbot --nginx -d <domain>`.
 
@@ -33,6 +34,24 @@ Caddy lauscht nur auf `127.0.0.1:8090`. TLS macht ein vorhandener nginx mit cert
 | `NEXT_PUBLIC_GOOGLE_CLIENT_ID` | Google Drive | Google Cloud Console: OAuth-Client „Webanwendung“, Origin = Seite, Scope `drive.file`, Drive API aktivieren |
 | `NEXT_PUBLIC_GITHUB_CLIENT_ID` | Online-Randomizer | GitHub OAuth App mit aktiviertem Device Flow. Ohne diese Variable können User einen Personal Access Token eintragen |
 | `NEXT_PUBLIC_OPERATOR_NAME`, `NEXT_PUBLIC_OPERATOR_ADDRESS`, `NEXT_PUBLIC_CONTACT_EMAIL`, `NEXT_PUBLIC_HOSTING_NOTE` | Datenschutzerklärung | |
+
+## Einladungen
+
+Solange `invite_only` an ist, geht Registrieren nur mit Code. Jeder User kann 3 Codes erstellen (Konto → Einladungen), Admins beliebig viele. Einstellungen und Admin setzen:
+
+```
+docker compose exec -T db psql -U postgres -d challengemon <<'SQL'
+update public.profiles set is_admin = true where id = (select id from auth.users where email = 'du@example.de');
+update public.app_settings set value = '5' where key = 'invites_per_user';
+update public.app_settings set value = 'false' where key = 'invite_only';  -- registrierung fuer alle offen
+SQL
+```
+
+Erster Code ohne Admin: `insert into public.invites (code) values ('START-12345');`
+
+## Challengemon-Cloud
+
+Dateien liegen im Docker-Volume `cloud` unter `/data/cloud/<user-id>/`. Die App prüft das Supabase-Token selbst (`JWT_SECRET`). Grenzen per `.env`: `CLOUD_ROM_SLOTS` (Standard 1), `CLOUD_DATA_MAX_MB` (Standard 256). nginx braucht für `/api/cloud/` ein höheres `client_max_body_size`, siehe `nginx-challengemon.conf`.
 
 ## Nextcloud
 

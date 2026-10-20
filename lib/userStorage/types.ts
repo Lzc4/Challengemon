@@ -1,4 +1,4 @@
-export type ProviderKind = "local" | "gdrive" | "nextcloud" | "s3" | "webdav";
+export type ProviderKind = "cloud" | "local" | "gdrive" | "nextcloud" | "s3" | "webdav";
 
 export type Progress = (done: number, total: number) => void;
 
@@ -50,6 +50,7 @@ export interface NextcloudConfig {
 }
 
 export type StorageConfig =
+  | { kind: "cloud" }
   | { kind: "local" }
   | { kind: "gdrive" }
   | NextcloudConfig
@@ -57,6 +58,7 @@ export type StorageConfig =
   | ({ kind: "webdav" } & WebdavConfig);
 
 export const PROVIDER_LABEL: Record<ProviderKind, string> = {
+  cloud: "Challengemon-Cloud",
   local: "Nur dieses Gerät",
   gdrive: "Google Drive",
   nextcloud: "Nextcloud",

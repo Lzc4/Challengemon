@@ -106,6 +106,12 @@ services:
       NEXT_PUBLIC_SUPABASE_URL: https://${SITE_DOMAIN}
       NEXT_PUBLIC_SUPABASE_ANON_KEY: ${ANON_KEY}
       NEXT_PUBLIC_GITHUB_CLIENT_ID: ${GITHUB_CLIENT_ID:-}
+      JWT_SECRET: ${JWT_SECRET}
+      CLOUD_DIR: /data/cloud
+      CLOUD_ROM_SLOTS: ${CLOUD_ROM_SLOTS:-1}
+      CLOUD_DATA_MAX_MB: ${CLOUD_DATA_MAX_MB:-256}
+    volumes:
+      - cloud:/data/cloud
 
   caddy:
     mem_limit: 64m
@@ -119,3 +125,4 @@ services:
 
 volumes:
   db:
+  cloud:

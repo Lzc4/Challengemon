@@ -4,7 +4,6 @@ import { useCallback, useEffect, useLayoutEffect, useRef, useState } from "react
 import { createPortal } from "react-dom";
 import { supabase } from "@/lib/supabase/client";
 import { configureStorage } from "@/lib/userStorage";
-import { googleClientId, googleToken } from "@/lib/userStorage/gdrive";
 import { connectNextcloud } from "@/lib/userStorage/nextcloud";
 import Dialog, { SoundToggle } from "./Dialog";
 import { sfx } from "./sfx";
@@ -17,7 +16,7 @@ export const REPLAY_EVENT = "cm-tutorial-replay";
 
 type Line = { text: string; spot?: string; rival?: boolean };
 
-type StarterId = "local" | "gdrive" | "nextcloud";
+type StarterId = "local" | "cloud" | "nextcloud";
 
 interface Starter {
   id: StarterId;
@@ -35,18 +34,18 @@ const STARTERS: Starter[] = [
     name: "CHIPPY",
     type: "Gerät",
     sprite: CHIPPY,
-    blurb: "Wohnt direkt in deinem Browser. Kein Konto nötig, superschnell, aber nur auf diesem einen Gerät.",
+    blurb: "Wohnt direkt in deinem Browser. Nichts verlässt dein Gerät, superschnell, aber eben nur auf diesem einen Gerät.",
     after: "Chippy bleibt bei dir auf diesem Gerät. Schnell und unkompliziert! Wenn du später auch am anderen PC spielen willst, kannst du unter Speicher jederzeit wechseln.",
     available: () => true,
   },
   {
-    id: "gdrive",
+    id: "cloud",
     name: "WOLKINO",
     type: "Wolke",
     sprite: WOLKINO,
-    blurb: "Fliegt in dein Google Drive. Deine Spiele und Stände sind auf jedem Gerät da, wo du dich anmeldest.",
-    after: "Wolkino hat einen Ordner „Challengemon“ in deinem Google Drive angelegt. Ab jetzt reist dein Fortschritt überall mit hin!",
-    available: () => !!googleClientId(),
+    blurb: "Schwebt auf unserem Server und gehört zu deinem Konto. Sofort startklar, auf jedem Gerät. Platz für ein Spiel und alle deine Spielstände.",
+    after: "Wolkino passt ab jetzt auf ein Spiel und deine Spielstände auf. Egal an welchem Gerät du dich einloggst, dein Fortschritt ist schon da!",
+    available: () => true,
   },
   {
     id: "nextcloud",
@@ -84,7 +83,7 @@ function intro(name: string, met: boolean): Line[] {
     { spot: "statistik", rival: true, text: "Spoiler: Ich bin's nicht. Ich spiele nämlich fehlerfrei!" },
     { text: `Das sagt ${RIVAL_NAME} jedes Mal. Und dann kommt ein kritischer Treffer…` },
     { text: "So! Bevor es losgeht, brauchst du aber noch einen Partner." },
-    { text: "Jedes dieser drei passt auf deine Spiele und Spielstände auf. Na los, such dir einen aus!" },
+    { text: "Jedes dieser drei passt auf deine Spiele und Spielstände auf. Wenn du unsicher bist: Wolkino ist perfekt für den Anfang. Na los, such dir einen aus!" },
   ];
 }
 
@@ -116,7 +115,7 @@ export default function Tutorial() {
   const [step, setStep] = useState(0);
   const [phase, setPhase] = useState<"talk" | "pick" | "confirm" | "server" | "after" | "end">("talk");
   const [server, setServer] = useState("");
-  const [pick, setPick] = useState(0);
+  const [pick, setPick] = useState(1);
   const [error, setError] = useState<string | null>(null);
   const [met, setMet] = useState(false);
   const userId = useRef<string | null>(null);
@@ -145,7 +144,7 @@ export default function Tutorial() {
       setMet(false);
       setStep(0);
       setPhase("talk");
-      setPick(0);
+      setPick(1);
       setError(null);
       setOpen(true);
     };
@@ -199,10 +198,7 @@ export default function Tutorial() {
     setError(null);
     try {
       if (starter.id === "local") configureStorage({ kind: "local" });
-      if (starter.id === "gdrive") {
-        await googleToken(true);
-        configureStorage({ kind: "gdrive" });
-      }
+      if (starter.id === "cloud") configureStorage({ kind: "cloud" });
       if (starter.id === "nextcloud") return setPhase("server");
       setPhase("after");
     } catch (err) {

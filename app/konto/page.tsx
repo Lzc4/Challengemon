@@ -6,6 +6,8 @@ import LegalFooter from "@/components/LegalFooter";
 import { supabase } from "@/lib/supabase/client";
 import { useMyProfile, useUser } from "@/lib/hooks";
 import { REPLAY_EVENT } from "@/components/tutorial/Tutorial";
+import InvitesCard from "@/components/InvitesCard";
+import { wipeCloud } from "@/lib/userStorage/cloud";
 
 export default function AccountPage() {
   const user = useUser();
@@ -40,7 +42,13 @@ export default function AccountPage() {
   }
 
   async function deleteAccount() {
-    if (!confirm("Konto wirklich löschen? Runs, die nur dir gehören, werden mitgelöscht. Dateien in deinem eigenen Speicher bleiben dort liegen.")) return;
+    if (
+      !confirm(
+        "Konto wirklich löschen? Runs, die nur dir gehören, und alles in deiner Challengemon-Cloud werden mitgelöscht. Dateien in deinem eigenen Speicher (Gerät, Nextcloud usw.) bleiben dort liegen.",
+      )
+    )
+      return;
+    await wipeCloud().catch(() => null);
     const { error } = await supabase().rpc("delete_my_account");
     if (error) {
       setError(error.message);
@@ -72,6 +80,7 @@ export default function AccountPage() {
             <button className="primary">Ändern</button>
           </div>
         </form>
+        <InvitesCard />
         <div className="card stack">
           <strong>Tutorial</strong>
           <span className="small muted">Professorin Kiesel erklärt dir die Seite gern nochmal.</span>
@@ -82,7 +91,7 @@ export default function AccountPage() {
         <div className="card stack">
           <strong>Konto löschen</strong>
           <span className="small muted">
-            Löscht dein Konto, deine Bibliothekseinträge und deine Daten in allen Runs. Deine Dateien in Google Drive, Nextcloud usw. liegen in deinem
+            Löscht dein Konto, deine Bibliothekseinträge, alles in deiner Challengemon-Cloud und deine Daten in allen Runs. Deine Dateien in Nextcloud usw. liegen in deinem
             eigenen Speicher und bleiben dort, bis du sie selbst löschst.
           </span>
           <div>

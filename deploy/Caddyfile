@@ -17,6 +17,9 @@
 			header_up Host realtime-dev.localhost
 		}
 	}
+	handle /api/cloud* {
+		reverse_proxy app:3000
+	}
 	handle {
 		encode zstd gzip
 		reverse_proxy app:3000

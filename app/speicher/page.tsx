@@ -17,6 +17,8 @@ import {
   type WebdavConfig,
 } from "@/lib/userStorage";
 import { googleClientId, googleToken } from "@/lib/userStorage/gdrive";
+import { cloudUsage, type CloudUsage } from "@/lib/userStorage/cloud";
+import { myLibrary } from "@/lib/storage";
 import { NEXTCLOUD_APP, connectNextcloud, nextcloudExpired } from "@/lib/userStorage/nextcloud";
 import {
   connectWithToken,
@@ -28,9 +30,10 @@ import {
   type DeviceCode,
 } from "@/lib/randomizer/github";
 
-const KINDS: ProviderKind[] = ["local", "gdrive", "nextcloud", "s3", "webdav"];
+const KINDS: ProviderKind[] = ["cloud", "local", "nextcloud", "gdrive", "s3", "webdav"];
 
 const HINT: Record<ProviderKind, string> = {
+  cloud: "Liegt auf unserem Server und gehört zu deinem Konto. Sofort startklar, auf jedem Gerät. Platz für ein Spiel und deine Spielstände.",
   local: "Alles bleibt im Browser auf diesem Gerät. Kein Konto nötig, aber auf anderen Geräten nicht verfügbar und weg, wenn du die Browserdaten löschst.",
   gdrive: "Ein Ordner „Challengemon“ in deinem Google Drive. Die Seite sieht nur Dateien, die sie selbst angelegt hat.",
   nextcloud: "Deine eigene Nextcloud. Login per Klick, die Dateien gehen direkt von deinem Browser zu deinem Server.",
@@ -40,6 +43,8 @@ const HINT: Record<ProviderKind, string> = {
 
 const EMPTY_S3: S3Config = { endpoint: "", bucket: "", region: "auto", accessKeyId: "", secretAccessKey: "", prefix: "challengemon" };
 const EMPTY_DAV: WebdavConfig = { url: "", username: "", password: "" };
+
+const mb = (n: number) => `${(n / 1024 / 1024).toFixed(n < 10 * 1024 * 1024 ? 1 : 0)} MB`;
 
 export default function StoragePage() {
   const active = useStorageKind();
@@ -54,6 +59,8 @@ export default function StoragePage() {
   const [origin, setOrigin] = useState("");
   const [ncServer, setNcServer] = useState("");
   const [nc, setNc] = useState<NextcloudConfig | null>(null);
+  const [cloud, setCloud] = useState<CloudUsage | null>(null);
+  const [titles, setTitles] = useState<Record<string, string>>({});
 
   useEffect(() => {
     setKinds(configuredKinds());
@@ -66,6 +73,12 @@ export default function StoragePage() {
     if (cd?.kind === "webdav") setDav(cd);
     setGh(githubAccount()?.login ?? null);
     setOrigin(window.location.origin);
+    cloudUsage()
+      .then(setCloud)
+      .catch(() => null);
+    myLibrary()
+      .then((list) => setTitles(Object.fromEntries(list.filter((r) => r.provider === "cloud").map((r) => [r.path, r.title]))))
+      .catch(() => null);
   }, [active]);
 
   async function test(kind: ProviderKind) {
@@ -154,8 +167,9 @@ export default function StoragePage() {
       <main className="container stack">
         <h1 style={{ margin: 0 }}>Speicher</h1>
         <p className="muted" style={{ margin: 0 }}>
-          Deine ROMs, Randomizer-Patches und Spielstände liegen in <strong>deinem</strong> Speicher. Unser Server sieht davon nichts. Er kennt nur
-          Dateinamen und Prüfsummen, damit deine Runs auf jedem Gerät funktionieren. Zugangsdaten bleiben in diesem Browser.
+          Hier legst du fest, wo deine Spiele, Randomizer-Patches und Spielstände liegen. Am einfachsten ist die <strong>Challengemon-Cloud</strong> auf
+          unserem Server. Alle anderen Speicher gehören dir: Dateien gehen dort direkt von deinem Browser zum Anbieter, unser Server sieht sie nicht,
+          und Zugangsdaten bleiben in diesem Browser.
         </p>
         {status && <p className="small">{status}</p>}
         {error && <p className="error small">{error}</p>}
@@ -185,6 +199,25 @@ export default function StoragePage() {
                       <summary>CORS-Regel für den Bucket</summary>
                       <pre className="code">{JSON.stringify([{ AllowedOrigins: [origin], AllowedMethods: ["GET", "PUT", "DELETE", "HEAD"], AllowedHeaders: ["*"], ExposeHeaders: ["ETag", "Content-Length"], MaxAgeSeconds: 3600 }], null, 2)}</pre>
                     </details>
+                  </div>
+                )}
+                {k === "cloud" && cloud && (
+                  <div className="stack small">
+                    <div>
+                      <span className="muted">Spiel: </span>
+                      {cloud.roms.length ? cloud.roms.map((r) => `${titles[r.path] ?? r.path.slice(5)} (${mb(r.size)})`).join(", ") : "noch keins"}
+                      <span className="muted">
+                        {" "}
+                        · Platz für {cloud.romSlots === 1 ? "1 Spiel" : `${cloud.romSlots} Spiele`}
+                      </span>
+                    </div>
+                    <div>
+                      <span className="muted">Spielstände und Patches: </span>
+                      {mb(cloud.data)} von {mb(cloud.dataMax)}
+                    </div>
+                    <div className="meter">
+                      <span style={{ width: `${Math.min(100, (cloud.data / cloud.dataMax) * 100)}%` }} />
+                    </div>
                   </div>
                 )}
                 {k === "nextcloud" && (
@@ -237,7 +270,7 @@ export default function StoragePage() {
                     </button>
                   )}
                   {connected && k !== "local" && <button onClick={() => test(k)}>Testen</button>}
-                  {connected && k !== "local" && (
+                  {connected && k !== "local" && k !== "cloud" && (
                     <button className="danger" onClick={() => forget(k)}>
                       Trennen
                     </button>

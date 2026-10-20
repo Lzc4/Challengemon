@@ -1,8 +1,9 @@
 "use client";
 
 import Link from "next/link";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { supabase } from "@/lib/supabase/client";
+import { checkInvite, inviteFromUrl, inviteOnly, inviteProblem, normalizeInvite, signupError } from "@/lib/invites";
 import Dialog, { SoundToggle } from "./Dialog";
 import PixelSprite from "./PixelSprite";
 import { PROFESSOR, RIVAL, RIVAL_NAME } from "./sprites";
@@ -13,6 +14,7 @@ type Step =
   | { id: "ask" }
   | { id: "login"; error?: string }
   | { id: "reset"; error?: string; sent?: boolean }
+  | { id: "invite"; error?: string }
   | { id: "name" }
   | { id: "creds"; error?: string }
   | { id: "terms"; declined?: boolean }
@@ -32,6 +34,39 @@ export default function Welcome() {
   const [name, setName] = useState("");
   const [busy, setBusy] = useState(false);
   const [confirmMail, setConfirmMail] = useState(false);
+  const [invite, setInvite] = useState("");
+  const [inviter, setInviter] = useState<string | null>(null);
+  const [needInvite, setNeedInvite] = useState(true);
+
+  useEffect(() => {
+    void inviteOnly().then(setNeedInvite).catch(() => null);
+    const code = inviteFromUrl();
+    if (!code) return;
+    setInvite(code);
+    void checkInvite(code)
+      .then((s) => s.valid && setInviter(s.inviter ?? "jemand"))
+      .catch(() => null);
+  }, []);
+
+  function startSignup() {
+    setStep(needInvite && !inviter ? { id: "invite" } : { id: "name" });
+  }
+
+  async function submitInvite(e: React.FormEvent) {
+    e.preventDefault();
+    setBusy(true);
+    try {
+      const status = await checkInvite(invite);
+      const problem = inviteProblem(status);
+      if (problem) return setStep({ id: "invite", error: problem });
+      setInviter(status.inviter ?? "jemand");
+      setStep({ id: "name" });
+    } catch (err) {
+      setStep({ id: "invite", error: err instanceof Error ? err.message : String(err) });
+    } finally {
+      setBusy(false);
+    }
+  }
 
   async function login(e: React.FormEvent) {
     e.preventDefault();
@@ -55,9 +90,16 @@ export default function Welcome() {
     const { data, error } = await supabase().auth.signUp({
       email: email.trim(),
       password,
-      options: { data: { name: name.trim() }, emailRedirectTo: `${window.location.origin}${nextUrl()}` },
+      options: { data: { name: name.trim(), invite: normalizeInvite(invite) }, emailRedirectTo: `${window.location.origin}${nextUrl()}` },
     });
-    if (error) return setStep({ id: "creds", error: error.message });
+    if (error) {
+      const msg = signupError(error.message);
+      if (msg !== error.message) {
+        setInviter(null);
+        return setStep({ id: "invite", error: msg });
+      }
+      return setStep({ id: "creds", error: msg });
+    }
     setConfirmMail(!data.session);
     try {
       sessionStorage.setItem(MET_KEY, "1");
@@ -78,13 +120,19 @@ export default function Welcome() {
 
   switch (step.id) {
     case "hello":
-      dialog = <Dialog key="hello" text="Hallo! Willkommen in der Welt von CHALLENGEMON! Ich bin KIESEL, die Challenge-Professorin." onNext={() => setStep({ id: "ask" })} />;
+      dialog = (
+        <Dialog
+          key={`hello-${inviter ?? ""}`}
+          text={`Hallo! Willkommen in der Welt von CHALLENGEMON! Ich bin KIESEL, die Challenge-Professorin.${inviter ? ` Wie ich höre, hat dich ${inviter} eingeladen!` : ""}`}
+          onNext={() => setStep({ id: "ask" })}
+        />
+      );
       break;
     case "ask":
       dialog = (
         <Dialog key="ask" text="Sag mal… kennen wir uns schon?">
           <div className="tut-choice">
-            <button onClick={() => setStep({ id: "name" })}>ICH BIN NEU</button>
+            <button onClick={startSignup}>ICH BIN NEU</button>
             <button onClick={() => setStep({ id: "login" })}>WIR KENNEN UNS</button>
           </div>
         </Dialog>
@@ -134,9 +182,32 @@ export default function Welcome() {
         </Dialog>
       );
       break;
+    case "invite":
+      dialog = (
+        <Dialog
+          key={`invite-${step.error ?? ""}`}
+          text={step.error ? `Hm. ${step.error}` : "Ein neues Gesicht! Challengemon ist gerade aber nur auf Einladung offen. Hast du einen Einladungscode von einem Freund?"}
+        >
+          <form className="tut-form" onSubmit={submitInvite}>
+            <input placeholder="Einladungscode, z. B. AB12C-34DEF" value={invite} onChange={(e) => setInvite(e.target.value)} required autoComplete="off" autoFocus />
+            <div className="tut-form-row">
+              <button type="button" data-sfx="back" className="link small" onClick={() => setStep({ id: "ask" })}>
+                Zurück
+              </button>
+              <button className="tut-go" disabled={busy}>
+                {busy ? "…" : "PRÜFEN ▶"}
+              </button>
+            </div>
+          </form>
+        </Dialog>
+      );
+      break;
     case "name":
       dialog = (
-        <Dialog key="name" text="Wunderbar, ein neues Gesicht! Dann fangen wir ganz vorne an. Wie heißt du denn?">
+        <Dialog
+          key="name"
+          text={`${inviter ? `Ah, ${inviter} hat dich eingeladen. Wunderbar!` : "Wunderbar, ein neues Gesicht!"} Dann fangen wir ganz vorne an. Wie heißt du denn?`}
+        >
           <form
             className="tut-form"
             onSubmit={(e) => {

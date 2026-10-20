@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { cloudProvider } from "./cloud";
 import { localProvider } from "./local";
 import { forgetGoogle, gdriveProvider } from "./gdrive";
 import { nextcloudProvider } from "./nextcloud";
@@ -23,7 +24,7 @@ function read(): Saved {
     const raw = localStorage.getItem(KEY);
     if (raw) return JSON.parse(raw) as Saved;
   } catch {}
-  return { active: "local", configs: { local: { kind: "local" } } };
+  return { active: "cloud", configs: { local: { kind: "local" } } };
 }
 
 function write(s: Saved) {
@@ -57,12 +58,15 @@ export function activeKind(): ProviderKind {
 export function configuredKinds(): ProviderKind[] {
   const s = read();
   const kinds = (Object.keys(s.configs) as ProviderKind[]).filter((k) => k in PROVIDER_LABEL);
-  return kinds.includes("local") ? kinds : ["local", ...kinds];
+  const all: ProviderKind[] = kinds.includes("local") ? kinds : ["local", ...kinds];
+  return all.includes("cloud") ? all : ["cloud", ...all];
 }
 
 export function providerFor(kind: ProviderKind): StorageProvider | null {
   const c = read().configs[kind];
   switch (kind) {
+    case "cloud":
+      return cloudProvider();
     case "local":
       return localProvider();
     case "gdrive":
