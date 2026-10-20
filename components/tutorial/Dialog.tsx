@@ -1,6 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useState } from "react";
+import { setSound, sfx, soundOn } from "./sfx";
 
 export function useTypewriter(text: string) {
   const [shown, setShown] = useState(0);
@@ -28,7 +29,10 @@ export default function Dialog({
   const tw = useTypewriter(text);
   const advance = useCallback(() => {
     if (!tw.done) tw.finish();
-    else onNext?.();
+    else if (onNext) {
+      sfx.next();
+      onNext();
+    }
   }, [tw, onNext]);
 
   useEffect(() => {
@@ -44,11 +48,40 @@ export default function Dialog({
   }, [advance]);
 
   return (
-    <div className="tut-dialog" onClick={(e) => !typing(e.target) && advance()} role="dialog" aria-live="polite">
+    <div
+      className="tut-dialog"
+      onClick={(e) => !typing(e.target) && advance()}
+      onClickCapture={(e) => {
+        const btn = e.target instanceof HTMLElement ? e.target.closest("button") : null;
+        if (btn && !(btn.type === "submit" && btn.form)) (sfx[btn.dataset.sfx as keyof typeof sfx] ?? sfx.next)();
+      }}
+      onSubmitCapture={() => sfx.confirm()}
+      role="dialog"
+      aria-live="polite"
+    >
       {who && <span className="tut-who">{who}</span>}
       <p>{tw.visible}</p>
       {tw.done && children}
       {tw.done && onNext && <span className="tut-next">▼</span>}
     </div>
+  );
+}
+
+export function SoundToggle({ className }: { className?: string }) {
+  const [on, setOn] = useState(true);
+  useEffect(() => setOn(soundOn()), []);
+  return (
+    <button
+      className={className}
+      onClick={() => {
+        setSound(!on);
+        setOn(!on);
+        if (!on) sfx.next();
+      }}
+      aria-label={on ? "Ton aus" : "Ton an"}
+      title={on ? "Ton aus" : "Ton an"}
+    >
+      {on ? "♪ Ton an" : "♪ Ton aus"}
+    </button>
   );
 }

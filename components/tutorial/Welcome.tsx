@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { useState } from "react";
 import { supabase } from "@/lib/supabase/client";
-import Dialog from "./Dialog";
+import Dialog, { SoundToggle } from "./Dialog";
 import PixelSprite from "./PixelSprite";
 import { PROFESSOR, RIVAL, RIVAL_NAME } from "./sprites";
 import { MET_KEY } from "./Tutorial";
@@ -100,7 +100,7 @@ export default function Welcome() {
               <button type="button" className="link small" onClick={() => setStep({ id: "reset" })}>
                 Passwort vergessen?
               </button>
-              <button type="button" className="link small" onClick={() => setStep({ id: "ask" })}>
+              <button type="button" data-sfx="back" className="link small" onClick={() => setStep({ id: "ask" })}>
                 Zurück
               </button>
               <button className="tut-go" disabled={busy}>
@@ -123,7 +123,7 @@ export default function Welcome() {
           <form className="tut-form" onSubmit={reset}>
             <input type="email" placeholder="E-Mail" value={email} onChange={(e) => setEmail(e.target.value)} required autoComplete="email" autoFocus />
             <div className="tut-form-row">
-              <button type="button" className="link small" onClick={() => setStep({ id: "login" })}>
+              <button type="button" data-sfx="back" className="link small" onClick={() => setStep({ id: "login" })}>
                 Zurück
               </button>
               <button className="tut-go" disabled={busy}>
@@ -146,7 +146,7 @@ export default function Welcome() {
           >
             <input placeholder="Dein Name" value={name} onChange={(e) => setName(e.target.value)} required minLength={2} maxLength={20} autoComplete="nickname" autoFocus />
             <div className="tut-form-row">
-              <button type="button" className="link small" onClick={() => setStep({ id: "ask" })}>
+              <button type="button" data-sfx="back" className="link small" onClick={() => setStep({ id: "ask" })}>
                 Zurück
               </button>
               <button className="tut-go">WEITER ▶</button>
@@ -179,7 +179,7 @@ export default function Welcome() {
               autoComplete="new-password"
             />
             <div className="tut-form-row">
-              <button type="button" className="link small" onClick={() => setStep({ id: "name" })}>
+              <button type="button" data-sfx="back" className="link small" onClick={() => setStep({ id: "name" })}>
                 Zurück
               </button>
               <button className="tut-go">WEITER ▶</button>
@@ -203,8 +203,12 @@ export default function Welcome() {
             </Link>
           </p>
           <div className="tut-choice">
-            <button onClick={signup}>JA</button>
-            <button onClick={() => setStep({ id: "terms", declined: true })}>NEIN</button>
+            <button data-sfx="confirm" onClick={signup}>
+              JA
+            </button>
+            <button data-sfx="back" onClick={() => setStep({ id: "terms", declined: true })}>
+              NEIN
+            </button>
           </div>
         </Dialog>
       );
@@ -242,6 +246,7 @@ export default function Welcome() {
 
   return (
     <div className="welcome">
+      <SoundToggle className="link small welcome-sound" />
       <div className="welcome-title">
         <span className="welcome-logo">CHALLENGEMON</span>
         <span className="muted small">Nuzlocke- und Soullocke-Runs im Browser, mit deinen eigenen Spielen und deinem eigenen Speicher.</span>

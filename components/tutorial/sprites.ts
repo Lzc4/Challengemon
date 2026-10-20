@@ -58,7 +58,7 @@ export const PROFESSOR: Sprite = {
 };
 
 // der dev, als rivale
-export const RIVAL_NAME = "LUCA";
+export const RIVAL_NAME = "Lzc4";
 
 export const RIVAL: Sprite = {
   rows: [

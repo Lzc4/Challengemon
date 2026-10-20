@@ -31,8 +31,8 @@ body {
   margin: 0;
   min-height: 100%;
   color: var(--text);
-  font-family: var(--font-sans), system-ui, -apple-system, "Segoe UI", sans-serif;
-  font-size: 16px;
+  font-family: var(--font-pixel), ui-monospace, monospace;
+  font-size: 17px;
   line-height: 1.5;
   background-color: var(--bg);
   background-image: radial-gradient(ellipse 90% 520px at 50% -120px, rgba(155, 220, 92, 0.09), transparent 70%);
@@ -387,7 +387,7 @@ button:disabled {
 }
 
 .small {
-  font-size: 0.86rem;
+  font-size: 0.9rem;
 }
 
 .error {
@@ -2264,13 +2264,17 @@ pre.code {
   transition: all 0.35s ease;
 }
 
-.tut-skip {
+.tut-top {
   position: absolute;
   top: 70px;
   right: 18px;
-  font-family: var(--font-sans), sans-serif;
+  display: flex;
+  gap: 8px;
+}
+
+.tut-top button {
   font-size: 0.85rem;
-  opacity: 0.8;
+  opacity: 0.85;
 }
 
 .tut-stage {
@@ -2422,7 +2426,7 @@ pre.code {
 }
 
 .tut-ball-type {
-  font-family: var(--font-sans), sans-serif;
+  font-family: var(--font-pixel), monospace;
   font-size: 0.78rem;
   color: #cbbfa6;
 }
@@ -2519,7 +2523,7 @@ pre.code {
 
 .tut-links {
   margin: 10px 0 0;
-  font-family: var(--font-sans), sans-serif;
+  font-family: var(--font-pixel), monospace;
 }
 
 .tut-links a {
@@ -2560,7 +2564,13 @@ pre.code {
 }
 
 .welcome-toggle {
-  align-self: flex-end;
+  align-self: flex-start;
+}
+
+.welcome-sound {
+  position: absolute;
+  top: 28px;
+  right: 24px;
 }
 
 @keyframes tut-fade {
@@ -2660,4 +2670,8 @@ pre.code {
   .tut-next {
     animation: none;
   }
+}
+
+input[type="file"]::file-selector-button {
+  font: inherit;
 }

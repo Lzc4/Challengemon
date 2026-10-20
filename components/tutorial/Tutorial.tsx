@@ -6,7 +6,8 @@ import { supabase } from "@/lib/supabase/client";
 import { configureStorage } from "@/lib/userStorage";
 import { googleClientId, googleToken } from "@/lib/userStorage/gdrive";
 import { dropboxAppKey, startDropboxLogin } from "@/lib/userStorage/dropbox";
-import Dialog from "./Dialog";
+import Dialog, { SoundToggle } from "./Dialog";
+import { sfx } from "./sfx";
 import PixelSprite from "./PixelSprite";
 import { CHIPPY, KISTLING, PROFESSOR, RIVAL, RIVAL_NAME, WOLKINO, type Sprite } from "./sprites";
 
@@ -169,10 +170,17 @@ export default function Tutorial() {
   useEffect(() => {
     if (phase !== "pick") return;
     const onKey = (e: KeyboardEvent) => {
-      if (e.key === "ArrowRight") setPick((p) => (p + 1) % STARTERS.length);
-      if (e.key === "ArrowLeft") setPick((p) => (p + STARTERS.length - 1) % STARTERS.length);
+      if (e.key === "ArrowRight" || e.key === "ArrowDown") {
+        sfx.move();
+        setPick((p) => (p + 1) % STARTERS.length);
+      }
+      if (e.key === "ArrowLeft" || e.key === "ArrowUp") {
+        sfx.move();
+        setPick((p) => (p + STARTERS.length - 1) % STARTERS.length);
+      }
       if ((e.key === "Enter" || e.key === " ") && STARTERS[pick].available()) {
         e.preventDefault();
+        sfx.next();
         setPhase("confirm");
       }
     };
@@ -210,9 +218,10 @@ export default function Tutorial() {
   return createPortal(
     <div className="tut">
       <Spotlight target={phase === "talk" ? line?.spot : undefined} />
-      <button className="tut-skip" onClick={() => finish()}>
-        Überspringen
-      </button>
+      <div className="tut-top">
+        <SoundToggle />
+        <button onClick={() => finish()}>Überspringen</button>
+      </div>
 
       {(phase === "pick" || phase === "confirm") && (
         <div className="tut-starters">
@@ -223,9 +232,16 @@ export default function Tutorial() {
                 className={`tut-ball${i === pick ? " on" : ""}${s.available() ? "" : " off"}`}
                 onClick={() => {
                   setPick(i);
-                  if (s.available()) setPhase("confirm");
+                  if (s.available()) {
+                    sfx.next();
+                    setPhase("confirm");
+                  } else sfx.back();
                 }}
-                onMouseEnter={() => phase === "pick" && setPick(i)}
+                onMouseEnter={() => {
+                  if (phase !== "pick" || i === pick) return;
+                  sfx.move();
+                  setPick(i);
+                }}
               >
                 <PixelSprite sprite={s.sprite} scale={5} className={i === pick ? "tut-bounce" : ""} />
                 <span className="tut-ball-name">{s.name}</span>
@@ -262,8 +278,12 @@ export default function Tutorial() {
         {phase === "confirm" && (
           <Dialog key={`confirm-${pick}`} text={`Du willst also ${starter.name}, den Typ ${starter.type}?`}>
             <div className="tut-choice" onClick={(e) => e.stopPropagation()}>
-              <button onClick={choose}>JA</button>
-              <button onClick={() => setPhase("pick")}>NEIN</button>
+              <button data-sfx="confirm" onClick={choose}>
+                JA
+              </button>
+              <button data-sfx="back" onClick={() => setPhase("pick")}>
+                NEIN
+              </button>
             </div>
           </Dialog>
         )}
@@ -271,8 +291,12 @@ export default function Tutorial() {
         {phase === "end" && (
           <Dialog key="end" text={`Super! Als Nächstes legst du dein erstes Spiel in die Bibliothek. Dein Abenteuer beginnt jetzt, ${name}!`}>
             <div className="tut-choice" onClick={(e) => e.stopPropagation()}>
-              <button onClick={() => finish("/library")}>ZUR BIBLIOTHEK</button>
-              <button onClick={() => finish()}>SPÄTER</button>
+              <button data-sfx="confirm" onClick={() => finish("/library")}>
+                ZUR BIBLIOTHEK
+              </button>
+              <button data-sfx="back" onClick={() => finish()}>
+                SPÄTER
+              </button>
             </div>
           </Dialog>
         )}
