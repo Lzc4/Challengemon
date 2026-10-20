@@ -588,7 +588,7 @@ export default function PlayPage() {
       w.EJS_disableDatabases = true;
       w.EJS_defaultControls = DEFAULT_CONTROLS;
       w.EJS_Buttons = HIDDEN_BUTTONS;
-      w.EJS_color = "#e3b341";
+      w.EJS_color = "#9bdc5c";
       w.EJS_disableLocalStorage = true;
       let compat = false;
       try {

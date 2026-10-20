@@ -61,11 +61,11 @@ export default function LoginPage() {
         <p className="muted small" style={{ margin: 0 }}>
           Nuzlocke- und Soullocke-Runs im Browser, mit deinen eigenen Spielen und deinem eigenen Speicher.
         </p>
-        <div className="row">
-          <button type="button" className={mode === "login" ? "primary" : ""} onClick={() => setMode("login")}>
+        <div className="seg">
+          <button type="button" className={mode === "login" ? "on" : ""} onClick={() => setMode("login")}>
             Einloggen
           </button>
-          <button type="button" className={mode === "signup" ? "primary" : ""} onClick={() => setMode("signup")}>
+          <button type="button" className={mode === "signup" ? "on" : ""} onClick={() => setMode("signup")}>
             Registrieren
           </button>
         </div>
