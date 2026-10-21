@@ -1,4 +1,5 @@
 import { supabase } from "@/lib/supabase/client";
+import { gunzipBlob, gzipBlob, isGzip } from "@/lib/compress";
 import { readBody, xhrUpload } from "./http";
 import type { StorageProvider } from "./types";
 
@@ -40,6 +41,9 @@ export async function wipeCloud() {
   await fetch(API, { method: "DELETE", headers: await auth() });
 }
 
+// roms schrumpfen mit gzip auf 30-45 %, spart platz auf dem server und zeit beim laden
+const packed = (path: string) => path.startsWith("roms/");
+
 // gehoert zum konto, braucht keine einrichtung und geht auf jedem geraet
 export function cloudProvider(): StorageProvider {
   return {
@@ -47,14 +51,22 @@ export function cloudProvider(): StorageProvider {
     label: "Challengemon-Cloud",
     remote: true,
     async put(path, data, onProgress) {
-      const res = await xhrUpload("PUT", url(path), await auth(), data, onProgress);
+      let body = data;
+      let report = onProgress;
+      if (packed(path)) {
+        // packen zaehlt als erstes fuenftel vom balken
+        body = await gzipBlob(data, (d, t) => onProgress?.((d / t) * 0.2, 1));
+        report = onProgress && ((d, t) => onProgress(0.2 + (d / t) * 0.8, 1));
+      }
+      const res = await xhrUpload("PUT", url(path), await auth(), body, report);
       if (res.status >= 300) throw new Error(await problem(res));
     },
     async get(path, onProgress) {
       const res = await fetch(url(path), { headers: await auth() });
       if (res.status === 404) return null;
       if (!res.ok) throw new Error(await problem({ status: res.status, text: await res.text() }));
-      return readBody(res, onProgress);
+      const blob = await readBody(res, onProgress);
+      return packed(path) && (await isGzip(blob)) ? gunzipBlob(blob) : blob;
     },
     async remove(path) {
       await fetch(url(path), { method: "DELETE", headers: await auth() });

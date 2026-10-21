@@ -18,6 +18,7 @@ export const CHANGELOG: Release[] = [
       { kind: "neu", text: "Rivale Lzc4 mischt mit" },
       { kind: "neu", text: "Nextcloud als Speicher mit Login per Klick (braucht die App WebAppPassword)" },
       { kind: "neu", text: "Challengemon-Cloud: ein Spiel und deine Spielstände direkt bei uns, sofort auf jedem Gerät" },
+      { kind: "besser", text: "Spiele in der Challengemon-Cloud werden gepackt gespeichert, Hoch- und Runterladen geht etwa doppelt so schnell" },
       { kind: "neu", text: "Registrierung nur mit Einladung, jeder kann unter Konto selbst Codes verteilen" },
       { kind: "besser", text: "Pixel-Schrift auf der ganzen Seite und Sounds für die Textboxen" },
       { kind: "besser", text: "Dropbox entfernt" },

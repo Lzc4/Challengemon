@@ -205,7 +205,7 @@ export default function StoragePage() {
                   <div className="stack small">
                     <div>
                       <span className="muted">Spiel: </span>
-                      {cloud.roms.length ? cloud.roms.map((r) => `${titles[r.path] ?? r.path.slice(5)} (${mb(r.size)})`).join(", ") : "noch keins"}
+                      {cloud.roms.length ? cloud.roms.map((r) => `${titles[r.path] ?? r.path.slice(5)} (${mb(r.size)} gepackt)`).join(", ") : "noch keins"}
                       <span className="muted">
                         {" "}
                         · Platz für {cloud.romSlots === 1 ? "1 Spiel" : `${cloud.romSlots} Spiele`}
